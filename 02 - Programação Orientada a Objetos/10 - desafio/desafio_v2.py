@@ -1,5 +1,5 @@
 import textwrap
-from abc import ABC, abstractclassmethod, abstractproperty
+from abc import ABC, abstractmethod
 from datetime import datetime
 
 
@@ -129,21 +129,20 @@ class Historico:
             {
                 "tipo": transacao.__class__.__name__,
                 "valor": transacao.valor,
-                "data": datetime.now().strftime("%d-%m-%Y %H:%M:%s"),
             }
         )
 
 
 class Transacao(ABC):
     @property
-    @abstractproperty
+    @abstractmethod
     def valor(self):
         pass
 
-    @abstractclassmethod
+    @classmethod
+    @abstractmethod
     def registrar(self, conta):
         pass
-
 
 class Saque(Transacao):
     def __init__(self, valor):
@@ -159,7 +158,6 @@ class Saque(Transacao):
         if sucesso_transacao:
             conta.historico.adicionar_transacao(self)
 
-
 class Deposito(Transacao):
     def __init__(self, valor):
         self._valor = valor
@@ -174,20 +172,17 @@ class Deposito(Transacao):
         if sucesso_transacao:
             conta.historico.adicionar_transacao(self)
 
-
 def menu():
-    menu = """\n
-    ================ MENU ================
-    [d]\tDepositar
-    [s]\tSacar
-    [e]\tExtrato
-    [nc]\tNova conta
-    [lc]\tListar contas
-    [nu]\tNovo usuário
-    [q]\tSair
-    => """
-    return input(textwrap.dedent(menu))
+    menu = """\n\n 
+=========================== MENU ===========================
+[d]\tDepositar \t\t\t[nu]\tNova Usuário
+[s]\tSacar \t\t\t\t[nc]\tNovo conta
+[e]\tExtrato \t\t\t[lc]\tListar contas
+[q]\tSair 
 
+Selecione=> """
+    
+    return input(menu).lower()
 
 def filtrar_cliente(cpf, clientes):
     clientes_filtrados = [cliente for cliente in clientes if cliente.cpf == cpf]
@@ -196,7 +191,8 @@ def filtrar_cliente(cpf, clientes):
 
 def recuperar_conta_cliente(cliente):
     if not cliente.contas:
-        print("\n@@@ Cliente não possui conta! @@@")
+        print("\n"+" Cliente não possui conta! ".center(60, "!"))
+        print("".center(60, "_"))
         return
 
     # FIXME: não permite cliente escolher a conta
@@ -208,7 +204,8 @@ def depositar(clientes):
     cliente = filtrar_cliente(cpf, clientes)
 
     if not cliente:
-        print("\n@@@ Cliente não encontrado! @@@")
+        print("\n"+" Cliente não encontrado! ".center(60, "!"))
+        print("".center(60, "_"))
         return
 
     valor = float(input("Informe o valor do depósito: "))
@@ -226,7 +223,7 @@ def sacar(clientes):
     cliente = filtrar_cliente(cpf, clientes)
 
     if not cliente:
-        print("\n@@@ Cliente não encontrado! @@@")
+        print("\n"+" Cliente não encontrado! ".center(60, "!"))
         return
 
     valor = float(input("Informe o valor do saque: "))
@@ -244,14 +241,15 @@ def exibir_extrato(clientes):
     cliente = filtrar_cliente(cpf, clientes)
 
     if not cliente:
-        print("\n@@@ Cliente não encontrado! @@@")
+        print("\n"+" Cliente não encontrado! ".center(60, "!"))
+        print("".center(60, "_"))
         return
 
     conta = recuperar_conta_cliente(cliente)
     if not conta:
         return
 
-    print("\n================ EXTRATO ================")
+    print("\n"+" EXTRATO ".center(60, "_")) 
     transacoes = conta.historico.transacoes
 
     extrato = ""
@@ -263,7 +261,7 @@ def exibir_extrato(clientes):
 
     print(extrato)
     print(f"\nSaldo:\n\tR$ {conta.saldo:.2f}")
-    print("==========================================")
+    print("".center(60, "=")) 
 
 
 def criar_cliente(clientes):
@@ -271,7 +269,8 @@ def criar_cliente(clientes):
     cliente = filtrar_cliente(cpf, clientes)
 
     if cliente:
-        print("\n@@@ Já existe cliente com esse CPF! @@@")
+        print("\n"+" Já existe cliente com esse CPF! ".center(60, "!"))
+        print("".center(60, "_"))
         return
 
     nome = input("Informe o nome completo: ")
@@ -282,7 +281,8 @@ def criar_cliente(clientes):
 
     clientes.append(cliente)
 
-    print("\n=== Cliente criado com sucesso! ===")
+    print("\n"+" Cliente criado com sucesso! ".center(60, "_"))
+    print("".center(60, "_"))
 
 
 def criar_conta(numero_conta, clientes, contas):
@@ -290,19 +290,20 @@ def criar_conta(numero_conta, clientes, contas):
     cliente = filtrar_cliente(cpf, clientes)
 
     if not cliente:
-        print("\n@@@ Cliente não encontrado, fluxo de criação de conta encerrado! @@@")
+        print("\n"+" Cliente não encontrado, fluxo de criação de conta encerrado! ".center(60, "!"))
+        print("".center(60, "_"))        
         return
 
     conta = ContaCorrente.nova_conta(cliente=cliente, numero=numero_conta)
     contas.append(conta)
     cliente.contas.append(conta)
 
-    print("\n=== Conta criada com sucesso! ===")
-
+    print("\n"+" Conta criada com sucesso! ".center(60, "_"))
+    print("".center(60, "_"))
 
 def listar_contas(contas):
     for conta in contas:
-        print("=" * 100)
+        print("".center(60, "_"))
         print(textwrap.dedent(str(conta)))
 
 
@@ -336,7 +337,6 @@ def main():
             break
 
         else:
-            print("\n@@@ Operação inválida, por favor selecione novamente a operação desejada. @@@")
-
-
+            print("\n"+" Operação inválida! Tente novamente ".center(60, "!"))
+            print("".center(60, "_"))
 main()
